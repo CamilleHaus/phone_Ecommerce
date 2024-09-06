@@ -22,7 +22,6 @@ model User {
   cartId   String?  @db.Uuid
 
   orders Order[] // Relacionamento com as compras feitas pelo usuário
-  cart   Cart[]
 }
 
 enum UserRole {
@@ -35,43 +34,34 @@ model Product {
   name        String
   brand       String
   description String
-  price       Float
+  price       Decimal
   stock       Int
   orderId     String? @db.Uuid
 
-  cartItems CartItem[]
-  Order     Order?     @relation(fields: [orderId], references: [id])
+  Order     Order?      @relation(fields: [orderId], references: [id])
+  OrderItem OrderItem[]
 }
 
-model Cart {
-  id String @id @default(uuid()) @db.Uuid
-
-  userId String @db.Uuid
-
-  User  User       @relation(fields: [userId], references: [id])
-  items CartItem[]
-}
-
-model CartItem {
+model OrderItem {
   id        String @id @default(uuid()) @db.Uuid
-  cartId    String @db.Uuid
   productId String @db.Uuid
+  orderId   String
   quantity  Int
 
-  cart    Cart    @relation(fields: [cartId], references: [id])
+  order   Order[]
   product Product @relation(fields: [productId], references: [id])
 }
 
 model Order {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  total     Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String  @id @default(uuid()) @db.Uuid
+  userId      String  @db.Uuid
+  total       Decimal
+  orderItemId String? @db.Uuid
 
-  status   OrderStatus
-  products Product[] // Lista de produtos no pedido
-  User     User        @relation(fields: [userId], references: [id])
+  status    OrderStatus
+  products  Product[] // Lista de produtos no pedido
+  User      User        @relation(fields: [userId], references: [id])
+  OrderItem OrderItem?  @relation(fields: [orderItemId], references: [id])
 }
 
 enum OrderStatus {
